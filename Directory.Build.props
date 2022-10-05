@@ -1,0 +1,10 @@
+<Project>
+	<PropertyGroup>
+		<LangVersion>10.0</LangVersion>
+		<WarningsAsErrors>true</WarningsAsErrors>
+
+		<Version>0.5.0</Version>
+		<Authors>Sean Batten</Authors>
+		<Copyright>Copyright Sean Batten</Copyright>
+	</PropertyGroup>
+</Project>
