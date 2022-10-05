@@ -6,5 +6,6 @@
 		<Version>0.5.0</Version>
 		<Authors>Sean Batten</Authors>
 		<Copyright>Copyright Sean Batten</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 </Project>
