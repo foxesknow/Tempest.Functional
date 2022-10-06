@@ -2,8 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.1;netstandard2.0;net461;net47;net48</TargetFrameworks>
-		<Nullable>enable</Nullable>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Nullable>enable</Nullable>		
 		<Title>Tempest.Functional</Title>
 		<Description>Functional types and extensions for C#</Description>
 		<RepositoryUrl>https://github.com/foxesknow/Tempest.Functional</RepositoryUrl>
@@ -14,7 +13,15 @@
 		
 	</PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="IsExternalInit" Version="1.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
 
