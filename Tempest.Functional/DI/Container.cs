@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ConstrainedExecution;
@@ -19,11 +20,61 @@ namespace Tempest.Functional.DI
 
         internal Container? Next{get; init;}
 
-        public virtual Container Register<TService, TInstance>(TInstance? instance) 
-            where TService : class
-            where TInstance : class, TService
+        /// <summary>
+        /// Registers a singleton that will be created on demand
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <typeparam name="TInstance"></typeparam>
+        /// <returns></returns>
+        public Container Register<TService, TInstance>() where TService : class where TInstance : class, TService
         {
-            return new Container<TService, TInstance>(0, instance);
+            return DoRegister<TService, TInstance>(Lifetime.Singleton, null);
+        }
+
+        /// <summary>
+        /// Registers a singleton instance
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <typeparam name="TInstance"></typeparam>
+        /// <returns></returns>
+        public Container Register<TService, TInstance>(TInstance instance) where TService : class where TInstance : class, TService
+        {
+            return DoRegister<TService, TInstance>(Lifetime.Singleton, instance);
+        }
+
+        /// <summary>
+        /// Registers an instance with the specified lifetime
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <typeparam name="TInstance"></typeparam>
+        /// <param name="lifetime"></param>
+        /// <returns></returns>
+        public Container Register<TService, TInstance>(Lifetime lifetime) where TService : class where TInstance : class, TService
+        {
+            return DoRegister<TService, TInstance>(lifetime, null);
+        }
+
+        /// <summary>
+        /// Registers an instance with the specified lifetime
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <typeparam name="TInstance"></typeparam>
+        /// <param name="lifetime"></param>
+        /// <param name="instance">The </param>
+        /// <returns></returns>
+        protected virtual Container DoRegister<TService, TInstance>(Lifetime lifetime, TInstance? instance) where TService : class where TInstance : class, TService
+        {
+            return new Container<TService, TInstance>(0, lifetime, instance);
+        }
+
+        public TService Get<TService>() where TService : class
+        {
+            if(TryCreate(typeof(TService), out var instance))
+            {
+                return (TService)instance!;
+            }
+
+            throw new Exception("could not create");
         }
 
         public virtual bool TryCreate(Type type, out object? instance)
@@ -44,16 +95,20 @@ namespace Tempest.Functional.DI
         }
     }
 
-    internal class Container<TThisService, TThisInstance> : Container 
+    public class Container<TThisService, TThisInstance> : Container 
         where TThisService : class
         where TThisInstance : class, TThisService
     {
         private readonly object m_SyncRoot = new object();
+        
         private object? m_Instance;
+        private Lifetime m_Lifetime;
 
-        public Container(int depth, TThisInstance? instance)
+        public Container(int depth, Lifetime lifetime,  TThisInstance? instance)
         {
             this.Depth = depth;
+            m_Lifetime = lifetime;
+
             this.Next = null;
 
             m_Instance = instance;
@@ -61,9 +116,9 @@ namespace Tempest.Functional.DI
 
         protected int Depth{get;}
 
-        public override Container Register<TService, TInstance>(TInstance? instance) where TInstance : class
+        protected override Container DoRegister<TService, TInstance>(Lifetime lifetime, TInstance? instance) where TInstance : class
         {
-            return new Container<TService, TInstance, TThisService, TThisInstance>(this.Depth + 1, instance, this);
+            return new Container<TService, TInstance, Container<TThisService, TThisInstance>>(this.Depth + 1, lifetime, instance, this);
         }
 
         public override bool TryCreate(Type type, out object? instance)
@@ -92,10 +147,10 @@ namespace Tempest.Functional.DI
             if(typeof(TThisInstance) != type) return null;
 
             // Try a lock free check first
-            if(m_Instance is not null) return m_Instance;
+            if(m_Lifetime == Lifetime.Singleton && m_Instance is not null) return m_Instance;
 
             // Now be a bit more rigourous
-            if(Interlocked.CompareExchange(ref m_Instance, null, null) is object existingInstance) return existingInstance;
+            if(m_Lifetime == Lifetime.Singleton && Interlocked.CompareExchange(ref m_Instance, null, null) is object existingInstance) return existingInstance;
 
             using(context.Enter(this.Depth))
             {
@@ -116,6 +171,12 @@ namespace Tempest.Functional.DI
                     {
                         throw new Exception("could not create argument type");
                     }
+                }
+
+
+                if(m_Lifetime == Lifetime.Transient)
+                {
+                    return ctor.Invoke(arguments);
                 }
 
                 lock(m_SyncRoot)
@@ -159,23 +220,21 @@ namespace Tempest.Functional.DI
         }
     }
 
-    internal class Container<TThisService, TThisInstance, TNextService, TNextInstance> : Container<TThisService, TThisInstance>
+    internal class Container<TThisService, TThisInstance, TNext> : Container<TThisService, TThisInstance>
         where TThisService : class
         where TThisInstance : class, TThisService
-        where TNextService : class
-        where TNextInstance : class, TNextService
     {
-        private readonly Container<TNextService, TNextInstance> m_Next;
+        private readonly Container m_Next;
 
-        public Container(int depth, TThisInstance? instance, Container<TNextService, TNextInstance> next) : base(depth, instance)
+        public Container(int depth, Lifetime lifetime,  TThisInstance? instance, Container next) : base(depth, lifetime, instance)
         {
             this.Next = next;
             m_Next = next;
         }
 
-        public override Container Register<TService, TInstance>(TInstance? instance) where TInstance : class
+        protected override Container DoRegister<TService, TInstance>(Lifetime lifetime, TInstance? instance) where TInstance : class
         {
-            return new Container<TService, TInstance, TThisService, TThisInstance>(this.Depth + 1, instance, this);
+            return new Container<TService, TInstance, Container<TThisService, TThisInstance, TNext>>(this.Depth + 1, lifetime, instance, this);
         }
 
         public override bool TryCreate(Type type, out object? instance)

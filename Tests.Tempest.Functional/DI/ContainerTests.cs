@@ -17,10 +17,10 @@ namespace Tests.Tempest.Functional.DI
         public void Register()
         {
             var container = Container.Empty
-                            .Register<Foo, Foo>(null)
-                            .Register<Bar, Bar>(null)
-                            .Register<Person, Person>(null)
-                            .Register<Address, Address>(null);
+                            .Register<Foo, Foo>()
+                            .Register<Bar, Bar>()
+                            .Register<Person, Person>()
+                            .Register<Address, Address>();
 
             Assert.That(container, Is.Not.Null);
 
@@ -38,7 +38,7 @@ namespace Tests.Tempest.Functional.DI
 
         class Person
         {
-            public Person(Foo foo, Bar bar, Person outer)
+            public Person(Foo foo, Bar bar)
             {
             }
         }
