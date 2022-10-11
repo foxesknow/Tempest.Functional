@@ -15,7 +15,7 @@ namespace Tempest.Functional.Threading
         /// <summary>
         /// Gets a unit task has already completed successfully
         /// </summary>
-        public static readonly Task<Unit> CompletedFast = Task.FromResult(new Unit());
+        public static readonly Task<Unit> CompletedTask = Task.FromResult(new Unit());
 
         /// <summary>
         /// Returns a unit task that has completed with a specified exception

@@ -8,9 +8,10 @@
 		<Description>Functional types and extensions for C#</Description>
 		<RepositoryUrl>https://github.com/foxesknow/Tempest.Functional</RepositoryUrl>
 		<PackageReadmeFile></PackageReadmeFile>
-		<PackageTags>Functional Option C#</PackageTags>
+		<PackageTags>Functional Option Unit C#</PackageTags>
 		<PackageProjectUrl>https://github.com/foxesknow/Tempest.Functional</PackageProjectUrl>
 		<PackageIcon>Logo.jpg</PackageIcon>
+		<Version>0.7.0</Version>
 		
 	</PropertyGroup>
 

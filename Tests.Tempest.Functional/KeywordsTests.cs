@@ -24,7 +24,7 @@ namespace Tests.Tempest.Functional
         [Test]
         public void None_Compare()
         {
-            Option<int> missing = default;
+            Option<int> missing = none;
             Assert.That(missing, Is.EqualTo(none));
         }
 

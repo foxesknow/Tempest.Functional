@@ -18,9 +18,9 @@ namespace Tests.Tempest.Functional.Threading
         [Test]
         public void CompletedTask()
         {
-            Assert.That(UnitTask.CompletedFast, Is.Not.Null);
-            Assert.That(UnitTask.CompletedFast.IsCompletedSuccessfully, Is.True);
-            Assert.That(UnitTask.CompletedFast.Result, Is.EqualTo(unit));
+            Assert.That(UnitTask.CompletedTask, Is.Not.Null);
+            Assert.That(UnitTask.CompletedTask.IsCompletedSuccessfully, Is.True);
+            Assert.That(UnitTask.CompletedTask.Result, Is.EqualTo(unit));
         }
 
         [Test]

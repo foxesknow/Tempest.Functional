@@ -33,6 +33,16 @@ Optional<int> age = default;
 Optional<int> age = new();
 ```
 
+Alternatively you can bring in the `none` pseudo-keyword from the `Tempest.Functional.Keywords.None` class:
+
+```csharp
+
+using static Tempest.Functional.Keywords.None;
+
+Option<int> age = none;
+
+```
+
 ## Creating from nullable types
 If you've got a nullable value or reference type then you can easily lift it into an `Option` using the `From` methods:
 
@@ -261,3 +271,31 @@ public void AddSurname(string middlename, string surname)
 ```
 
 When using the stateful overloads the state is always the final parameter to the lambda.
+
+
+# Unit
+The `Unit` type is used to indicate the absence of a value. 
+
+Although `void` plays a similar role in C# it is very much a second class citizen in the type system
+and can lead to awkward overload situations. For example, there is `Action<>` for lambdas that do not
+return a value and `Func<>` for lambdas that do return a value. Likewise there is `Task` for async methods
+that do not return a value and `Task<>` for async methods that do.
+
+The `UnitTask` class in the `Tempest.Functional.Threading` namespace provides convenient ways to create a
+`Task<Unit>` instances, and comes with a `CompletedTask` instance that can be reused in order to avoid
+task allocations.
+
+You can use the `unit` pseudo-keyword in `Tempest.Functional.Keywords.Unit` to provide a more descriptive way
+of returning a `Unit` type:
+
+```csharp
+
+using static Tempest.Functional.Keywords.Unit;
+
+Func<Unit> sayHello =
+{
+    Console.WriteLine("hello");
+    return unit;
+};
+
+```
