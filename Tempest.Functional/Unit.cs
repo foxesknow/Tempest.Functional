@@ -49,5 +49,27 @@ namespace Tempest.Functional
         {
             return "()";
         }
+
+        /// <summary>
+        /// Always returns true
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(Unit left, Unit right)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Always returns false
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(Unit left, Unit right)
+        {
+            return false;
+        }
     }
 }
