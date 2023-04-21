@@ -13,7 +13,7 @@ namespace Tempest.Functional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]
-    public readonly struct Option<T> : IEquatable<Option<T>>, IOption where T : notnull
+    public readonly struct Option<T> : IEquatable<Option<T>>, IOption
     {
         private enum NoCheck{Value};
 
@@ -24,28 +24,6 @@ namespace Tempest.Functional
         /// </summary>
         /// <param name="value"></param>
         public Option(T value)
-        {
-            // Just in case someone insists on forcing a null
-            if(value is null)
-            {
-                m_Value = default!;
-                IsSome = false;
-            }
-            else
-            {
-                m_Value = value;
-                IsSome = true;
-            }
-        }
-
-        /// <summary>
-        /// Initializes the instance to some value.
-        /// This is used when the caller has already done checks
-        /// and saves us having to do them again
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="_"></param>
-        private Option(T value, NoCheck _)
         {
             m_Value = value;
             IsSome = true;
@@ -388,12 +366,9 @@ namespace Tempest.Functional
         /// Converts a value to an option
         /// </summary>
         /// <param name="value"></param>
-        public static implicit operator Option<T>(T? value)
+        public static implicit operator Option<T>(T value)
         {
-           if(value is null) return default;
-
-           // We've already checked for null, so don't do it again in the constructor
-           return new(value, NoCheck.Value);
+           return new(value);
         }
     }
 

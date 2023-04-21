@@ -17,7 +17,7 @@ namespace Tempest.Functional
         /// <typeparam name="T"></typeparam>
         /// <param name="self"></param>
         /// <returns></returns>
-        public static Option<T> Flatten<T>(in this Option<Option<T>> self) where T : notnull
+        public static Option<T> Flatten<T>(in this Option<Option<T>> self)
         {
             return self.ValueOr(Option.None);
         }
