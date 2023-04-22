@@ -17,7 +17,7 @@ namespace Tests.Tempest.Functional
         public void AsString()
         {
             var none = new None();
-            Assert.That(none.ToString(), Is.EqualTo("none"));
+            Assert.That(none.ToString(), Is.EqualTo("None"));
         }
 
         [Test]

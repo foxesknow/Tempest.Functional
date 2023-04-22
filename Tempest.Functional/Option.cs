@@ -119,7 +119,7 @@ namespace Tempest.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="selector"></param>
         /// <returns></returns>
-        public Option<TResult> Select<TResult>(Func<T, TResult> selector)  where TResult : notnull
+        public Option<TResult> Select<TResult>(Func<T, TResult> selector)
         {
             if(selector is null) throw new ArgumentNullException(nameof(selector));
 
@@ -142,7 +142,7 @@ namespace Tempest.Functional
         /// <param name="selector">The function to call with the data in the option</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">selector is null</exception>
-        public Option<TResult> Select<TState, TResult>(TState state, Func<T, TState, TResult> selector)  where TResult : notnull
+        public Option<TResult> Select<TState, TResult>(TState state, Func<T, TState, TResult> selector)
         {
             if(selector is null) throw new ArgumentNullException(nameof(selector));
 
@@ -162,7 +162,7 @@ namespace Tempest.Functional
         /// <param name="binder"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">binder is null</exception>
-        public Option<TResult> Bind<TResult>(Func<T, Option<TResult>> binder) where TResult : notnull
+        public Option<TResult> Bind<TResult>(Func<T, Option<TResult>> binder)
         {
             if(binder is null) throw new ArgumentNullException(nameof(binder));
 
@@ -181,7 +181,7 @@ namespace Tempest.Functional
         /// <param name="binder">The function to call with the data in the binder</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">binder is null</exception>
-        public Option<TResult> Bind<TState, TResult>(TState state, Func<T, TState, Option<TResult>> binder) where TResult : notnull
+        public Option<TResult> Bind<TState, TResult>(TState state, Func<T, TState, Option<TResult>> binder)
         {
             if(binder is null) throw new ArgumentNullException(nameof(binder));
 
@@ -279,11 +279,12 @@ namespace Tempest.Functional
         {
             if(IsSome)
             {
-                return m_Value?.ToString() ?? "null";
+                var text = m_Value?.ToString() ?? "null";
+                return $"Some({text})";
             }
             else
             {
-                return "none";
+                return "None";
             }
         }
 
@@ -383,7 +384,7 @@ namespace Tempest.Functional
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Option<T> Some<T>(T value) where T : notnull
+        public static Option<T> Some<T>(T value)
         {
             return new Option<T>(value);
         }
@@ -394,7 +395,7 @@ namespace Tempest.Functional
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Option<T> From<T>(Nullable<T> value) where T : struct
+        public static Option<T> TreatNullAsNone<T>(Nullable<T> value) where T : struct
         {
             return value.HasValue ? Some(value.Value) : None;
         }
@@ -405,7 +406,7 @@ namespace Tempest.Functional
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Option<T> From<T>(T? value) where T : class
+        public static Option<T> TreatNullAsNone<T>(T? value) where T : class
         {
             if(value is not null) return Some(value);
 

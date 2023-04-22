@@ -53,7 +53,7 @@ namespace Tempest.Functional
         /// <inheritdoc/>
         public override string ToString()
         {
-            return "none";
+            return "None";
         }
     }
 }
