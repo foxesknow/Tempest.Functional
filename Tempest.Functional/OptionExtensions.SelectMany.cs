@@ -18,8 +18,14 @@ namespace Tempest.Functional
         /// <param name="optionSelector"></param>
         /// <param name="resultSelector"></param>
         /// <returns></returns>
-        public static Option<TResult> SelectMany<T, U, TResult>(in this Option<T> self, Func<T, Option<U>> optionSelector, Func<T, U, TResult> resultSelector)  
+        public static Option<TResult> SelectMany<T, U, TResult>(in this Option<T> self, Func<T, Option<U>> optionSelector, Func<T, U, TResult> resultSelector) 
+            where T : notnull
+            where U : notnull
+            where TResult : notnull
         {
+            ArgumentNullException.ThrowIfNull(optionSelector);
+            ArgumentNullException.ThrowIfNull(resultSelector);
+
             return self.Bind
             (
                 (optionSelector, resultSelector), 
@@ -29,6 +35,6 @@ namespace Tempest.Functional
                     static (u, state) => state.resultSelector(state.t, u)
                 )
             );
-        } 
+        }
     }
 }

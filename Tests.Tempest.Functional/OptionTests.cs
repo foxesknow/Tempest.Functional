@@ -34,17 +34,26 @@ namespace Tests.Tempest.Functional
         }
 
         [Test]
-        public void Initialization_ForceNull()
+        public void Initialization_FromReference()
         {
-            Option<string> option = new(null!);
+            Option<string> option = new("Jack");
             Assert.That(option.IsSome, Is.True);
             Assert.That(option.IsNone, Is.False);
         }
 
         [Test]
-        public void Implicit_Reference()
+        public void Initialization_ForceNull()
         {
-            Option<string> name = null!;
+            Option<string> option = new(null!);
+            Assert.That(option.IsSome, Is.False);
+            Assert.That(option.IsNone, Is.True);
+        }
+
+       
+        [Test]
+        public void Implicit_Reference_NotNull()
+        {
+            Option<string> name = "Hello";
             Assert.That(name.IsSome, Is.True);
         }
 
@@ -227,6 +236,21 @@ namespace Tests.Tempest.Functional
         }
 
         [Test]
+        public void TryGetValue_None_NullableInt()
+        {
+            Option<int> x = default;
+
+            if(x.TryGetValue(out var value))
+            {
+                Assert.Fail("expected a value");                
+            }
+            else
+            {
+                Assert.That(value, Is.EqualTo(0));
+            }            
+        }
+
+        [Test]
         public void Value_Some()
         {
             Option<int> x = 80;
@@ -389,34 +413,41 @@ namespace Tests.Tempest.Functional
         }
 
         [Test]
-        public void TreatNullAsNone_Value_HasValue()
+        public void New_Value_HasValue()
         {
             int? id = 10;
-            var value = Option.TreatNullAsNone(id);
+            var value = Option.New(id);
             Assert.That(value.ValueOr(-1), Is.EqualTo(10));
         }
 
         [Test]
-        public void TreatNullAsNone_Value_IsNull()
+        public void New_Value_IsNull()
         {
             int? id = null;
-            var value = Option.TreatNullAsNone(id);
+            var value = Option.New(id);
             Assert.That(value.ValueOr(-1), Is.EqualTo(-1));
         }
 
         [Test]
-        public void TreatNullAsNone_Reference_HasValue()
+        public void New_Value()
+        {
+            var value = Option.New(10);
+            Assert.That(value.ValueOr(-1), Is.EqualTo(10));
+        }
+
+        [Test]
+        public void New_Reference_HasValue()
         {
             var name = "Bob";
-            var value = Option.TreatNullAsNone(name);
+            var value = Option.New(name);
             Assert.That(value.ValueOr("Fred"), Is.EqualTo("Bob"));
         }
 
         [Test]
-        public void TreatNullAsNone_Reference_IsNull()
+        public void New_Reference_IsNull()
         {
             string? name = null;
-            var value = Option.TreatNullAsNone(name);
+            var value = Option.New(name);
             Assert.That(value.ValueOr("Fred"), Is.EqualTo("Fred"));
         }
 

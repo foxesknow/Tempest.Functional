@@ -13,6 +13,11 @@ namespace Tempest.Functional
     public readonly struct Unit : IEquatable<Unit>, IComparable<Unit>
     {
         /// <summary>
+        /// A default instance of a unit
+        /// </summary>
+        public static readonly Unit Value = new();
+
+        /// <summary>
         /// Always returns 0
         /// </summary>
         /// <param name="other"></param>

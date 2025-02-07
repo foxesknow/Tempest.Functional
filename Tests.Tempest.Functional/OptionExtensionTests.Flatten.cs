@@ -15,8 +15,8 @@ namespace Tests.Tempest.Functional
         [Test]
         public void Flatten()
         {
-            var inner = Option.Some("Hello");
-            var outer = Option.Some(inner);
+            var inner = Option.New("Hello");
+            var outer = Option.New(inner);
             Assert.That(outer.Value(), Is.EqualTo(inner));
 
             var flattened = outer.Flatten();

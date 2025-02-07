@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
-
+using Tempest.Functional;
 using Tempest.Functional.Threading;
 using static Tempest.Functional.Keywords.Unit;
 
@@ -59,6 +59,39 @@ namespace Tests.Tempest.Functional.Threading
             Assert.That(task, Is.Not.Null);
             Assert.That(task.IsCompleted, Is.True);
             Assert.That(task.IsCanceled, Is.True);
+        }
+
+        [Test]
+        public void Task_Completed()
+        {
+            var task = Task.CompletedTask.ToUnitTask();
+            Assert.That(task.IsCompletedSuccessfully, Is.True);
+        }
+
+        [Test]
+        public async Task Task_Delay()
+        {
+            var result = await Task.Delay(1000).ToUnitTask();
+            Assert.That(result, Is.EqualTo(Unit.Value));
+        }
+
+        [Test]
+        public void ValueTask_Completed()
+        {
+            var task = ValueTask.CompletedTask.ToUnitTask();
+            Assert.That(task.IsCompletedSuccessfully, Is.True);
+        }
+
+        [Test]
+        public async ValueTask ValueTask_Delay()
+        {
+            var result = await Delay().ToUnitTask();
+            Assert.That(result, Is.EqualTo(Unit.Value));
+
+            static async ValueTask Delay()
+            {
+                await Task.Delay(1000);
+            }
         }
     }
 }

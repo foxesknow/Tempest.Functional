@@ -13,7 +13,12 @@ namespace Tempest.Functional.Threading
     public static class UnitTask
     {
         /// <summary>
-        /// Gets a unit task has already completed successfully
+        /// A unit value task that has already completed successfully
+        /// </summary>
+        public static readonly ValueTask<Unit> CompletedValueTask = default;
+
+        /// <summary>
+        /// A unit task that has already completed successfully
         /// </summary>
         public static readonly Task<Unit> CompletedTask = Task.FromResult(new Unit());
 
@@ -25,7 +30,7 @@ namespace Tempest.Functional.Threading
         /// <exception cref="ArgumentNullException">exception is null</exception>
         public static Task<Unit> FromException(Exception exception)
         {
-            if(exception is null) throw new ArgumentNullException(nameof(exception));
+            ArgumentNullException.ThrowIfNull(nameof(exception));
 
             var tcs = new TaskCompletionSource<Unit>();
             tcs.SetException(exception);
@@ -33,7 +38,6 @@ namespace Tempest.Functional.Threading
             return tcs.Task;
         }
 
-#if NET6_0_OR_GREATER
         /// <summary>
         /// Returns a task that has been cancelled with a given token
         /// </summary>
@@ -46,8 +50,7 @@ namespace Tempest.Functional.Threading
 
             return tcs.Task;
         }
-#endif
-    
+
         /// <summary>
         /// Returns a task that has been cancelled
         /// </summary>
@@ -58,6 +61,45 @@ namespace Tempest.Functional.Threading
             tcs.SetCanceled();
 
             return tcs.Task;
+        }
+
+
+        /// <summary>
+        /// Turns a task that returns nothing into a task that returns something
+        /// </summary>
+        /// <param name="task">The task to convert</param>
+        /// <returns>A task that returns Unit</returns>
+        public static Task<Unit> ToUnitTask(this Task task)
+        {
+            ArgumentNullException.ThrowIfNull(task);
+
+            if(task.IsCompletedSuccessfully) return CompletedTask;
+
+            return Execute(task);
+
+            static async Task<Unit> Execute(Task task)
+            {
+                await task.ConfigureAwait(false);
+                return default;
+            }
+        }
+
+        /// <summary>
+        /// Turns a value task that returns nothing into a value task that returns something
+        /// </summary>
+        /// <param name="task">The task to convert</param>
+        /// <returns>A task that returns Unit</returns>
+        public static ValueTask<Unit> ToUnitTask(this ValueTask task)
+        {
+            if(task.IsCompletedSuccessfully) return CompletedValueTask;
+
+            return Execute(task);
+
+            static async ValueTask<Unit> Execute(ValueTask task)
+            {
+                await task.ConfigureAwait(false);
+                return default;
+            }
         }
 
     }

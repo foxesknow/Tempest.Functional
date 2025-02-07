@@ -15,7 +15,7 @@ namespace Tempest.Functional
         /// <param name="self"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Option<T> OrElse<T>(in this Option<T> self, in Option<T> other)
+        public static Option<T> OrElse<T>(in this Option<T> self, in Option<T> other) where T : notnull
         {
             return self.IsSome ? self : other;
         }
@@ -28,9 +28,9 @@ namespace Tempest.Functional
         /// <param name="function"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static Option<T> OrElse<T>(in this Option<T> self, Func<Option<T>> function)
+        public static Option<T> OrElse<T>(in this Option<T> self, Func<Option<T>> function) where T : notnull
         {
-            if(function is null) throw new ArgumentNullException(nameof(function));
+            ArgumentNullException.ThrowIfNull(function);
 
             return self.IsSome ? self : function();
         }
@@ -45,9 +45,9 @@ namespace Tempest.Functional
         /// <param name="function"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static Option<T> OrElse<T, TState>(in this Option<T> self, TState state, Func<TState, Option<T>> function)
+        public static Option<T> OrElse<T, TState>(in this Option<T> self, TState state, Func<TState, Option<T>> function) where T : notnull
         {
-            if(function is null) throw new ArgumentNullException(nameof(function));
+            ArgumentNullException.ThrowIfNull(function);
 
             return self.IsSome ? self : function(state);
         }

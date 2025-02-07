@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Tempest.Functional.Impl;
 
 namespace Tempest.Functional
 {
@@ -13,20 +14,26 @@ namespace Tempest.Functional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]
-    public readonly struct Option<T> : IEquatable<Option<T>>, IOption
+    public readonly struct Option<T> : IEquatable<Option<T>>, IOption where T : notnull
     {
-        private enum NoCheck{Value};
-
         private readonly T m_Value;
 
         /// <summary>
         /// Initializes the instance to some value
         /// </summary>
         /// <param name="value"></param>
-        public Option(T value)
+        public Option(T? value)
         {
-            m_Value = value;
-            IsSome = true;
+            if(value is null)
+            {
+                m_Value = default!;
+                IsSome = false;
+            }
+            else
+            {
+                m_Value = value;
+                IsSome = true;
+            }
         }
 
         /// <summary>
@@ -73,8 +80,8 @@ namespace Tempest.Functional
         /// <exception cref="ArgumentNullException">One of the functions was none</exception>
         public TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none)
         {
-            if(some is null) throw new ArgumentNullException(nameof(some));
-            if(none is null) throw new ArgumentNullException(nameof(none));
+            ArgumentNullException.ThrowIfNull(some);
+            ArgumentNullException.ThrowIfNull(none);
 
             if(IsSome)
             {
@@ -99,8 +106,8 @@ namespace Tempest.Functional
         /// <exception cref="ArgumentNullException">One of the functions was none</exception>
         public TResult Match<TState, TResult>(TState state, Func<T, TState, TResult> some, Func<TState, TResult> none)
         {
-            if(some is null) throw new ArgumentNullException(nameof(some));
-            if(none is null) throw new ArgumentNullException(nameof(none));
+            ArgumentNullException.ThrowIfNull(some);
+            ArgumentNullException.ThrowIfNull(none);
 
             if(IsSome)
             {
@@ -119,16 +126,16 @@ namespace Tempest.Functional
         /// <typeparam name="TResult"></typeparam>
         /// <param name="selector"></param>
         /// <returns></returns>
-        public Option<TResult> Select<TResult>(Func<T, TResult> selector)
+        public Option<TResult> Select<TResult>(Func<T, TResult> selector) where TResult : notnull
         {
-            if(selector is null) throw new ArgumentNullException(nameof(selector));
+            ArgumentNullException.ThrowIfNull(selector);
 
             if(IsSome)
             {
                 return new(selector(m_Value));
             }
 
-            return new Option<TResult>();
+            return default;
         }
 
         /// <summary>
@@ -142,16 +149,16 @@ namespace Tempest.Functional
         /// <param name="selector">The function to call with the data in the option</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">selector is null</exception>
-        public Option<TResult> Select<TState, TResult>(TState state, Func<T, TState, TResult> selector)
+        public Option<TResult> Select<TState, TResult>(TState state, Func<T, TState, TResult> selector) where TResult : notnull
         {
-            if(selector is null) throw new ArgumentNullException(nameof(selector));
+            ArgumentNullException.ThrowIfNull(selector);
 
             if(IsSome)
             {
                 return new(selector(m_Value, state));
             }
 
-            return new Option<TResult>();
+            return default;
         }
 
         /// <summary>
@@ -162,9 +169,9 @@ namespace Tempest.Functional
         /// <param name="binder"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">binder is null</exception>
-        public Option<TResult> Bind<TResult>(Func<T, Option<TResult>> binder)
+        public Option<TResult> Bind<TResult>(Func<T, Option<TResult>> binder) where TResult : notnull
         {
-            if(binder is null) throw new ArgumentNullException(nameof(binder));
+            ArgumentNullException.ThrowIfNull(binder);
 
             if(IsNone) return default;
 
@@ -181,9 +188,9 @@ namespace Tempest.Functional
         /// <param name="binder">The function to call with the data in the binder</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">binder is null</exception>
-        public Option<TResult> Bind<TState, TResult>(TState state, Func<T, TState, Option<TResult>> binder)
+        public Option<TResult> Bind<TState, TResult>(TState state, Func<T, TState, Option<TResult>> binder) where TResult : notnull
         {
-            if(binder is null) throw new ArgumentNullException(nameof(binder));
+            ArgumentNullException.ThrowIfNull(binder);
 
             if(IsNone) return default;
 
@@ -212,7 +219,7 @@ namespace Tempest.Functional
         /// </summary>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T ValueOr(T defaultValue)
+        public T? ValueOr(T? defaultValue)
         {
             return IsSome ? m_Value : defaultValue;
         }
@@ -225,7 +232,7 @@ namespace Tempest.Functional
         /// <exception cref="ArgumentNullException">defaultValueFactory is null</exception>
         public T ValueOr(Func<T> defaultValueFactory)
         {
-            if(defaultValueFactory is null) throw new ArgumentNullException(nameof(defaultValueFactory));
+            ArgumentNullException.ThrowIfNull(defaultValueFactory);
 
             return IsSome ? m_Value : defaultValueFactory();
         }
@@ -239,7 +246,7 @@ namespace Tempest.Functional
         /// <exception cref="ArgumentNullException">defaultValueFactory is null</exception>
         public T ValueOr<TState>(TState state, Func<TState, T> defaultValueFactory)
         {
-            if(defaultValueFactory is null) throw new ArgumentNullException(nameof(defaultValueFactory));
+            ArgumentNullException.ThrowIfNull(defaultValueFactory);
 
             return IsSome ? m_Value : defaultValueFactory(state);
         }
@@ -369,7 +376,7 @@ namespace Tempest.Functional
         /// <param name="value"></param>
         public static implicit operator Option<T>(T value)
         {
-           return new(value);
+            return new(value);
         }
     }
 
@@ -379,12 +386,12 @@ namespace Tempest.Functional
     public static class Option
     {
         /// <summary>
-        /// Returns an option containing some value
+        /// Creates an option from a nullable reference
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Option<T> Some<T>(T value)
+        public static Option<T> New<T>(T? value, RequireClass<T>? _ = default) where T : class
         {
             return new Option<T>(value);
         }
@@ -395,22 +402,25 @@ namespace Tempest.Functional
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Option<T> TreatNullAsNone<T>(Nullable<T> value) where T : struct
+        public static Option<T> New<T>(T? value, RequireStruct<T>? _ = default) where T : struct
         {
-            return value.HasValue ? Some(value.Value) : None;
+            if(value is null)
+            {
+                return Option.None;
+            }
+
+            return new Option<T>(value.Value);
         }
 
         /// <summary>
-        /// Creates an option from a nullable reference
+        /// Creates an option from a value
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Option<T> TreatNullAsNone<T>(T? value) where T : class
+        public static Option<T> New<T>(T value, RequireStruct<T>? _ = default) where T : struct
         {
-            if(value is not null) return Some(value);
-
-            return None;
+            return new Option<T>(value);
         }
 
         /// <summary>
